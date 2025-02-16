@@ -3,41 +3,64 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
 )
 
-var task string
-
-type requestBody struct {
-	Task string `json:"task"`
-}
-
-func SetTaskHandler(w http.ResponseWriter, r *http.Request) {
-	var req requestBody
-
-	err := json.NewDecoder(r.Body).Decode(&req)
+// Создание задачи (POST)
+func CreateTask(w http.ResponseWriter, r *http.Request) {
+	var task Task
+	err := json.NewDecoder(r.Body).Decode(&task)
 	if err != nil {
 		http.Error(w, "Ошибка декодирования JSON", http.StatusBadRequest)
 		return
 	}
-	task = req.Task
 
+	// Запись задачи в БД
+	result := DB.Create(&task)
+	if result.Error != nil {
+		http.Error(w, "Ошибка записи в БД", http.StatusInternalServerError)
+		return
+	}
+
+	// Отправка ответа клиенту
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(task)
 }
 
-func HelloHandler(w http.ResponseWriter, r *http.Request) {
-	if task == "" {
-		fmt.Fprintf(w, "Hello, task not set")
-	} else {
-		fmt.Fprintf(w, "Hello, %s", task)
+// Получение всех tasks (GET)
+func GetTasks(w http.ResponseWriter, r *http.Request) {
+	var tasks []string // Слайс для хранения всех значений task
+
+	// Выбираем только поле Task из всех записей
+	var allTasks []Task
+	DB.Select("task").Find(&allTasks)
+
+	// Заполняем слайс строками task
+	for _, t := range allTasks {
+		tasks = append(tasks, t.Task)
 	}
+
+	// Отправляем JSON-ответ
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(tasks)
 }
 
 func main() {
-	task = "test task"
+	// Инициализация БД
+	InitDB()
+
+	// Автоматическая миграция модели Task
+	DB.AutoMigrate(&Task{})
+
+	// Настройка роутера
 	router := mux.NewRouter()
-	router.HandleFunc("/api/task", SetTaskHandler).Methods("POST")
-	router.HandleFunc("/api/hello", HelloHandler).Methods("GET")
-	http.ListenAndServe(":8080", router)
+	router.HandleFunc("/api/tasks", CreateTask).Methods("POST")
+	router.HandleFunc("/api/tasks", GetTasks).Methods("GET")
+
+	// Запуск сервера
+	fmt.Println("Сервер запущен на порту 8080")
+	log.Fatal(http.ListenAndServe(":8080", router))
 }
