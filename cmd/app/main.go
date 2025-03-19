@@ -13,7 +13,6 @@ import (
 func main() {
 	// Инициализируем базу данных
 	database.InitDB()
-	database.DB.AutoMigrate(&taskService.Task{})
 
 	// Создаем репозиторий, сервис и хендлер
 	repo := taskService.NewTaskRepository(database.DB)
