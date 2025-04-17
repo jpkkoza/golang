@@ -91,3 +91,25 @@ func (h *TaskHandler) DeleteTasksId(_ context.Context, request tasks.DeleteTasks
 
 	return tasks.DeleteTasksId204Response{}, nil // 204 No Content
 }
+
+func (h *TaskHandler) GetUsersIdTasks(_ context.Context, req tasks.GetUsersIdTasksRequestObject) (tasks.GetUsersIdTasksResponseObject, error) {
+	userID := req.Id
+
+	userTasks, err := h.Service.GetTasksByUserID(uint(userID))
+	if err != nil {
+		return nil, err
+	}
+
+	response := tasks.GetUsersIdTasks200JSONResponse{}
+	for _, t := range userTasks {
+		task := tasks.Task{
+			Id:     &t.ID,
+			Task:   &t.Task,
+			IsDone: &t.IsDone,
+			UserId: &t.UserID,
+		}
+		response = append(response, task)
+	}
+
+	return response, nil
+}

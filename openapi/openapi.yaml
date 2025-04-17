@@ -37,6 +37,32 @@ paths:
               schema:
                 $ref: '#/components/schemas/Task'
 
+  /users/{id}/tasks:
+    get:
+      summary: Get tasks by user ID
+      tags:
+        - tasks
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: ID пользователя
+      responses:
+        '200':
+          description: Список задач пользователя
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        '400':
+          description: Некорректный ID
+        '500':
+          description: Ошибка сервера
+
   /tasks/{id}:
     patch:
       summary: Обновить задачу по ID
@@ -181,7 +207,9 @@ components:
           type: string
         is_done:
           type: boolean
-
+        user_id:
+          type: integer
+          format: uint
     User:
       type: object
       properties:
