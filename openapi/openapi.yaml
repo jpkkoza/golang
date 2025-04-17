@@ -209,7 +209,7 @@ components:
           type: boolean
         user_id:
           type: integer
-          format: uint
+          format: uuid
     User:
       type: object
       properties:
