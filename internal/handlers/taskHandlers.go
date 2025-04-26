@@ -30,6 +30,7 @@ func (h *TaskHandler) GetTasks(_ context.Context, _ tasks.GetTasksRequestObject)
 			Id:     &tsk.ID,
 			Task:   &tsk.Task,
 			IsDone: &tsk.IsDone,
+			UserId: &tsk.UserID,
 		}
 		response = append(response, task)
 	}

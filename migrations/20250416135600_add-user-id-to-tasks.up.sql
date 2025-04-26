@@ -1,2 +1,0 @@
-ALTER TABLE tasks
-ADD COLUMN user_id uint REFERENCES users(id) ON DELETE CASCADE;

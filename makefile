@@ -29,3 +29,10 @@ gen-tasks:
 gen-users:
 	oapi-codegen -config openapi/.openapi -include-tags users -package users openapi/openapi.yaml > ./internal/web/users/api.gen.go
 
+# Полная очистка базы данных
+reset-db:
+	psql -U postgres -d main -c "DROP TABLE IF EXISTS tasks CASCADE;"
+	psql -U postgres -d main -c "DROP TABLE IF EXISTS users CASCADE;"
+	psql -U postgres -d main -c "DROP TABLE IF EXISTS schema_migrations CASCADE;"
+
+
